@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symptom Checker - Advanced Health Solutions</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-clinic-medical me-2"></i> HealthSync
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                    <li class="nav-item"><a class="btn btn-primary btn-sm ms-3" href="#symptom-checker">Get Started</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section text-center">
+        <div class="container">
+            <h1 data-aos="fade-up">Your Health, Our Priority</h1>
+            <p class="lead" data-aos="fade-up" data-aos-delay="100">Use our AI-powered Symptom Checker to get instant diagnosis and recommendations.</p>
+            <a href="#symptom-checker" class="btn btn-primary btn-lg mt-3" data-aos="fade-up" data-aos-delay="200">Start Now</a>
+        </div>
+    </section>
+
+    <!-- Symptom Checker Section -->
+    <section id="symptom-checker" class="container my-5">
+        <div class="row">
+            <div class="col-md-6" data-aos="fade-right">
+                <div class="card shadow-lg p-4">
+                    <h2 class="text-primary mb-4"><i class="fas fa-heartbeat me-2"></i> Symptom Checker</h2>
+                    <form id="symptomForm">
+                        <div class="mb-3">
+                            <label for="symptoms" class="form-label">Describe your symptoms:</label>
+                            <textarea class="form-control" id="symptoms" rows="5" placeholder="e.g., I have a fever, cough, and runny nose..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100"><i class="fas fa-diagnoses me-2"></i> Check Symptoms</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6" data-aos="fade-left">
+                <div id="results" class="card shadow-lg p-4 d-none">
+                    <h2 class="text-primary mb-4"><i class="fas fa-file-medical-alt me-2"></i> Diagnosis Results</h2>
+                    <div id="loading" class="text-center d-none">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Analyzing your symptoms...</p>
+                    </div>
+                    <div id="resultContent">
+                        <p><strong>Predicted Disease:</strong> <span id="disease" class="text-success"></span></p>
+                        <p><strong>Confidence:</strong> <span id="confidence"></span></p>
+                        <div class="progress mb-3">
+                            <div id="confidenceBar" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <h5>Recommended Tests:</h5>
+                        <ul id="recommendedTests" class="list-group mb-3"></ul>
+                        <h5>Medications:</h5>
+                        <ul id="medications" class="list-group mb-3"></ul>
+                        <h5>Additional Advice:</h5>
+                        <p id="advice"></p>
+                        <!-- Book Blood Test Button -->
+                        <button type="button" class="btn btn-success mt-3" data-bs-toggle="modal" data-bs-target="#bookingModal">
+                            <i class="fas fa-vial me-2"></i> Book Blood Test
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Booking Modal -->
+    <div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bookingModalLabel">Book a Blood Test</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="bookingForm">
+                        <div class="mb-3">
+                            <label for="patientName" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="patientName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Phone (Optional)</label>
+                            <input type="tel" class="form-control" id="phone">
+                        </div>
+                        <div class="mb-3">
+                            <label for="testName" class="form-label">Select Test</label>
+                            <select class="form-select" id="testName" required>
+                                <option value="">Choose a test...</option>
+                                <!-- Options will be populated dynamically -->
+                            </select>
+                        </div>
+                        <input type="hidden" id="diseaseName">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="submitBooking">Book Now</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Services Section -->
+    <section id="services" class="services-section py-5">
+        <div class="container">
+            <h2 class="text-center mb-5" data-aos="fade-up">Our Services</h2>
+            <div class="row">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="card shadow-sm text-center p-4">
+                        <i class="fas fa-stethoscope fa-3x text-primary mb-3"></i>
+                        <h5>AI Diagnosis</h5>
+                        <p>Get instant diagnosis using our advanced AI technology based on your symptoms.</p>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="card shadow-sm text-center p-4">
+                        <i class="fas fa-user-md fa-3x text-primary mb-3"></i>
+                        <h5>Doctor Consultations</h5>
+                        <p>Connect with certified doctors for personalized health advice and follow-ups.</p>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="card shadow-sm text-center p-4">
+                        <i class="fas fa-heartbeat fa-3x text-primary mb-3"></i>
+                        <h5>Health Monitoring</h5>
+                        <p>Track your health metrics and get personalized health tips daily.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="testimonials-section py-5">
+        <div class="container">
+            <h2 class="text-center mb-5" data-aos="fade-up">What Our Users Say</h2>
+            <div class="row">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="card shadow-sm p-4">
+                        <p>"This tool helped me understand my symptoms and get the right tests done quickly!"</p>
+                        <h6 class="text-primary">– Sarah Johnson</h6>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="card shadow-sm p-4">
+                        <p>"The AI diagnosis was spot on, and the recommendations were very helpful."</p>
+                        <h6 class="text-primary">– Michael Brown</h6>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="card shadow-sm p-4">
+                        <p>"I love how easy it is to use, and the design feels so professional."</p>
+                        <h6 class="text-primary">– Emily Davis</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="faq-section py-5">
+        <div class="container">
+            <h2 class="text-center mb-5" data-aos="fade-up">Frequently Asked Questions</h2>
+            <div class="accordion" id="faqAccordion">
+                <div class="accordion-item" data-aos="fade-up" data-aos-delay="100">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                            How accurate is the Symptom Checker?
+                        </button>
+                    </h2>
+                    <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Our AI model is trained on a vast dataset of symptoms and diseases, providing accurate predictions with confidence scores. However, always consult a doctor for a final diagnosis.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item" data-aos="fade-up" data-aos-delay="200">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                            Is my data secure?
+                        </button>
+                    </h2>
+                    <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Yes, we prioritize your privacy. All data is encrypted and not stored on our servers.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item" data-aos="fade-up" data-aos-delay="300">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                            Can I consult a doctor through this platform?
+                        </button>
+                    </h2>
+                    <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Yes, we offer virtual consultations with certified doctors. Check our Services section for more details.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>HealthSync</h5>
+                    <p>Empowering your health with AI-driven solutions.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#services">Services</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contact Us</h5>
+                    <p>Email: support@healthsync.com</p>
+                    <p>Phone: +1 (555) 123-4567</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <p class="text-center mt-3 mb-0">© 2025 HealthSync. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AOS JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+        AOS.init({ duration: 1000 });
+    </script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+import pandas as pd
+
+# Load the dataset
+df = pd.read_csv("symptom2disease.csv")
+
+# Explore the dataset
+print(df.head()) 
+
+
+print(df.info())  # Check for missing values and data types
+
+
+
+print(df['label'].value_counts())  # Check the distribution of diseases
+
+#Step 3: Preprocess the Data
+Malaria = df[df['label'] == 'Malaria']
+print(Malaria.head())
+
+
+import re
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+
+
+# Download NLTK resources
+nltk.download('punkt')
+nltk.download('stopwords')
+
+# Text cleaning function
+def clean_text(text):
+    # Convert to lowercase
+    text = text.lower()
+    # Remove special characters and numbers
+    text = re.sub(r'[^a-zA-Z\s]', '', text)
+    # Tokenize text
+    tokens = word_tokenize(text)
+    # Remove stopwords
+    stop_words = set(stopwords.words('english'))
+    tokens = [word for word in tokens if word not in stop_words]
+    # Join tokens back into a string
+    return ' '.join(tokens)
+
+
+# Check the cleaned text
+print(df[['text', 'cleaned_text']].head())
+
+
+#Step 4: Split the Data into Training and Testing Sets
+
+from sklearn.model_selection import train_test_split
+
+# Split the data
+X_train, X_test, y_train, y_test = train_test_split(df['cleaned_text'], df['label'], test_size=0.2, random_state=42)
+
+print("Training set size:", len(X_train))
+print("Testing set size:", len(X_test))
+
+
+#Step 5: Vectorize the Text Data
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+# Initialize the vectorizer
+vectorizer = TfidfVectorizer(max_features=5000)
+
+# Fit and transform the training data
+X_train_vec = vectorizer.fit_transform(X_train)
+
+# Transform the testing data
+X_test_vec = vectorizer.transform(X_test)
+
+print("Shape of training data:", X_train_vec.shape)
+print("Shape of testing data:", X_test_vec.shape)
+
+# Train a Machine Learning Model
+
+
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score, classification_report
+
+# Initialize the model
+model = MultinomialNB()
+
+# Train the model
+model.fit(X_train_vec, y_train)
+
+
+
+# Make predictions on the test set
+y_pred = model.predict(X_test_vec)
+
+
+
+# Evaluate the model
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("Classification Report:\n", classification_report(y_test, y_pred))
+
+import joblib
+
+# Save the model
+joblib.dump(model, 'symptom_checker_model.pkl')
+
+# Save the vectorizer
+joblib.dump(vectorizer, 'tfidf_vectorizer.pkl')
+
+
+
+import joblib
+
+# Load the model and vectorizer
+model = joblib.load('symptom_checker_model.pkl')
+vectorizer = joblib.load('tfidf_vectorizer.pkl')
+
+
+
+from flask import Flask, request, jsonify
+import joblib
+import threading
+
+
+# Initialize the Flask app
+app = Flask(__name__)
+
+
+
+# Text cleaning function
+def clean_text(text):
+    import re
+    import nltk
+    from nltk.corpus import stopwords
+    from nltk.tokenize import word_tokenize
+
+    # Convert to lowercase
+    text = text.lower()
+    # Remove special characters and numbers
+    text = re.sub(r'[^a-zA-Z\s]', '', text)
+    # Tokenize text
+    tokens = word_tokenize(text)
+    # Remove stopwords
+    stop_words = set(stopwords.words('english'))
+    tokens = [word for word in tokens if word not in stop_words]
+    # Join tokens back into a string
+    return ' '.join(tokens)
+
+
+
+
+# Define the prediction route
+@app.route('/predict', methods=['POST'])
+def predict():
+    # Get user input from the request
+    user_input = request.json['symptoms']
+    
+    # Clean and preprocess the input
+    cleaned_input = clean_text(user_input)
+    
+    # Vectorize the input
+    input_vec = vectorizer.transform([cleaned_input])
+    
+    # Make a prediction
+    prediction = model.predict(input_vec)
+    
+    # Return the prediction as JSON
+    return jsonify({'predicted_disease': prediction[0]})
+
+# Function to run the Flask app
+def run_flask_app():
+    app.run(debug=True, use_reloader=False) 
+
+# Start the Flask app in a separate thread
+flask_thread = threading.Thread(target=run_flask_app)
+flask_thread.start()
+
+
+
+
+import requests
+
+# Define the API endpoint
+url = 'http://127.0.0.1:5000/predict'
+
+# Define the input data
+data = {
+    'symptoms': 'There is bruising on my legs that I cannot explain. I can see strange blood vessels below the skin.'
+}
+
+# Send a POST request to the API
+response = requests.post(url, json=data)
+
+# Print the response
+print(response.json())
+
+
