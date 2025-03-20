@@ -161,9 +161,11 @@ document.getElementById('submitBooking').addEventListener('click', function() {
     const email = document.getElementById('email').value;
     const phone = document.getElementById('phone').value;
     const testName = document.getElementById('testName').value;
+    const slotDate = document.getElementById('slotDate').value;  // YYYY-MM-DD
+    const slotTime = document.getElementById('slotTime').value;  // HH:MM
     const disease = document.getElementById('diseaseName').value;
 
-    if (!patientName || !email || !testName) {
+    if (!patientName || !email || !testName || !slotDate || !slotTime) {
         alert('Please fill in all required fields.');
         return;
     }
@@ -176,7 +178,9 @@ document.getElementById('submitBooking').addEventListener('click', function() {
             email: email,
             phone: phone,
             disease: disease,
-            test_name: testName
+            test_name: testName,
+            slot_date: slotDate,
+            slot_time: slotTime
         })
     })
     .then(response => response.json())
