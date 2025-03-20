@@ -7,8 +7,17 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 import mysql.connector
 from mysql.connector import Error
-from dotenv import load_dotenv  # Import load_dotenv
-import os  # Import os to access environment variables
+from dotenv import load_dotenv
+import os
+
+# Download required NLTK data
+try:
+    nltk.data.find('corpora/stopwords')
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    print("Downloading NLTK data...")
+    nltk.download('stopwords')
+    nltk.download('punkt')
 
 # Load environment variables from .env file
 load_dotenv()
@@ -111,8 +120,6 @@ def predict():
 def home():
     return render_template('index.html')
 
-
-# Route for booking a blood test
 @app.route('/book_blood_test', methods=['POST'])
 def book_blood_test():
     data = request.json
@@ -147,6 +154,5 @@ def book_blood_test():
         return jsonify({"error": "Database connection failed"}), 500
 
 if __name__ == '__main__':
-    init_db()  # Initialize the database and table
+    init_db()
     app.run(debug=True)
-
